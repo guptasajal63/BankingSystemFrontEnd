@@ -4,7 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store/store";
 import App from "./App";
+import setupInterceptors from "./services/setupInterceptors";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+setupInterceptors(store);
 import CssBaseline from '@mui/material/CssBaseline';
 
 import theme from "./theme";
