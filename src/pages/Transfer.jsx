@@ -38,6 +38,11 @@ const Transfer = () => {
         setMessage("");
         setSuccessful(false);
 
+        if (fromAccount === toAccountNumber) {
+            setMessage("Cannot transfer funds to the same account.");
+            return;
+        }
+
         TransactionService.transferFunds(fromAccount, toAccountNumber, amount).then(
             (response) => {
                 setMessage(response.data.message);
