@@ -4,7 +4,7 @@ import BillService from "../services/bill.service";
 import {
     Container, Typography, TextField, Button, Box, Alert, MenuItem, Paper,
     Grid, Card, CardContent, CardActionArea, Avatar, Divider, CircularProgress,
-    Stack, IconButton
+    Stack, IconButton, Modal, Fade, Zoom
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
@@ -13,7 +13,7 @@ import WifiIcon from '@mui/icons-material/Wifi';
 import TvIcon from '@mui/icons-material/Tv';
 import OpacityIcon from '@mui/icons-material/Opacity'; // Water
 import WhatshotIcon from '@mui/icons-material/Whatshot'; // Gas
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Mock Data for Categories and Biller
 const BILL_CATEGORIES = [
@@ -43,6 +43,7 @@ const BillPayments = () => {
     const [fetching, setFetching] = useState(false);
     const [message, setMessage] = useState("");
     const [successful, setSuccessful] = useState(false);
+    const [transactionId, setTransactionId] = useState("");
 
     useEffect(() => {
         retrieveAccounts();
@@ -115,11 +116,10 @@ const BillPayments = () => {
 
         BillService.payBill(fromAccount, fullBillerName, amount).then(
             (response) => {
-                setMessage("Payment Successful!");
+                setTransactionId("TXN" + Math.floor(Math.random() * 1000000000));
                 setSuccessful(true);
                 setLoading(false);
-                setFetchedBill(null);
-                // Don't auto-redirect, let them see the success
+                // Do NOT clear fetchedBill here, otherwise renderStep3 crashes while success modal is showing
             },
             (error) => {
                 const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -128,6 +128,20 @@ const BillPayments = () => {
                 setLoading(false);
             }
         );
+    };
+
+    const handleCloseSuccess = () => {
+        setSuccessful(false);
+        setTransactionId("");
+        setProvider("");
+        setConsumerNumber("");
+        setAmount("");
+        setMessage("");
+
+        // Return to categories
+        setStep(1);
+        setSelectedCategory(null);
+        setFetchedBill(null);
     };
 
     // --- RENDER HELPERS ---
@@ -274,31 +288,25 @@ const BillPayments = () => {
                 ))}
             </TextField>
 
-            {message && <Alert severity={successful ? "success" : "error"} sx={{ mb: 2 }}>{message}</Alert>}
+            {message && !successful && <Alert severity="error" sx={{ mb: 2 }}>{message}</Alert>}
 
-            {!successful && (
-                <Button
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    color="success"
-                    onClick={handlePayBill}
-                    disabled={loading || !amount}
-                >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : `Pay ₹${amount}`}
-                </Button>
-            )}
-
-            {successful && (
-                <Button variant="outlined" fullWidth onClick={() => { setStep(1); setSuccessful(false); setMessage(""); }}>
-                    Pay Another Bill
-                </Button>
-            )}
+            <Button
+                variant="contained"
+                fullWidth
+                size="large"
+                color="success"
+                onClick={handlePayBill}
+                disabled={loading || !amount}
+                sx={{ height: 50, fontSize: '1.1rem' }}
+            >
+                {loading ? <CircularProgress size={24} color="inherit" /> : `Pay ₹${amount}`}
+            </Button>
         </Paper>
     );
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 10 }}>
+            {/* Steps Rendering */}
             <Box sx={{ textAlign: 'center', mb: 5 }}>
                 <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
                     Bill Payments
@@ -311,6 +319,75 @@ const BillPayments = () => {
             {step === 1 && renderStep1_Categories()}
             {step === 2 && renderStep2_Details()}
             {step === 3 && renderStep3_Pay()}
+
+            {/* Success Animation Modal */}
+            <Modal
+                open={successful}
+                onClose={() => { }} // Force user to click Close button
+                closeAfterTransition
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Fade in={successful}>
+                    <Paper
+                        elevation={24}
+                        sx={{
+                            p: 4,
+                            borderRadius: 4,
+                            textAlign: 'center',
+                            width: '90%',
+                            maxWidth: 400,
+                            outline: 'none',
+                            bgcolor: '#f1f8e9'
+                        }}
+                    >
+                        <Zoom in={successful} style={{ transitionDelay: '200ms' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                                <CheckCircleIcon sx={{ fontSize: 100, color: '#2e7d32' }} />
+                            </Box>
+                        </Zoom>
+
+                        <Typography variant="h5" fontWeight="900" color="success.main" gutterBottom>
+                            Payment Successful!
+                        </Typography>
+
+                        <Typography variant="body1" color="text.secondary" gutterBottom>
+                            For {selectedCategory ? selectedCategory.name : 'Bill Payment'} - {provider}
+                        </Typography>
+
+                        <Typography variant="h4" fontWeight="bold" sx={{ my: 3, fontFamily: 'monospace' }}>
+                            ₹{amount}
+                        </Typography>
+
+                        <Divider sx={{ my: 2 }} />
+
+                        <Stack spacing={1} sx={{ mt: 2, textAlign: 'left', bgcolor: 'white', p: 2, borderRadius: 2, border: '1px solid #ddd' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Typography variant="caption" color="text.secondary">Transaction ID</Typography>
+                                <Typography variant="body2" fontWeight="bold">{transactionId}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Typography variant="caption" color="text.secondary">Account Debited</Typography>
+                                <Typography variant="body2" fontWeight="bold">{fromAccount}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Typography variant="caption" color="text.secondary">Time</Typography>
+                                <Typography variant="body2" fontWeight="bold">{new Date().toLocaleTimeString()}</Typography>
+                            </Box>
+                        </Stack>
+
+                        <Button
+                            variant="contained"
+                            color="success"
+                            fullWidth
+                            size="large"
+                            sx={{ mt: 4, borderRadius: 8, textTransform: 'none', fontSize: '1.1rem' }}
+                            onClick={handleCloseSuccess}
+                        >
+                            Done
+                        </Button>
+                    </Paper>
+                </Fade>
+            </Modal>
         </Container>
     );
 };
