@@ -1,69 +1,183 @@
-import React from 'react';
-import { Box, Container, Typography, Link, Grid } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Container, Chip, Avatar } from "@mui/material";
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LogoutIcon from '@mui/icons-material/Logout';
 
-const Footer = () => {
-    return (
-        <Box
-            component="footer"
-            sx={{
-                py: 6,
-                px: 2,
-                mt: 'auto',
-                backgroundColor: (theme) =>
-                    theme.palette.mode === 'light'
-                        ? theme.palette.grey[200]
-                        : theme.palette.grey[800],
-            }}
-        >
-            <Container maxWidth="lg">
-                <Grid container spacing={4}>
-                    <Grid item xs={12} sm={4}>
-                        <Typography variant="h6" color="text.primary" gutterBottom>
-                            Online Banking System
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Secure, fast, and reliable banking for everyone.
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Typography variant="h6" color="text.primary" gutterBottom>
-                            Quick Links
-                        </Typography>
-                        <Link href="/" color="inherit" display="block">
-                            Home
-                        </Link>
-                        <Link href="/about" color="inherit" display="block">
-                            About Us
-                        </Link>
-                        <Link href="/contact" color="inherit" display="block">
-                            Contact Support
-                        </Link>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Typography variant="h6" color="text.primary" gutterBottom>
-                            Legal
-                        </Typography>
-                        <Link href="/privacy" color="inherit" display="block">
-                            Privacy Policy
-                        </Link>
-                        <Link href="/terms" color="inherit" display="block">
-                            Terms of Service
-                        </Link>
-                    </Grid>
-                </Grid>
-                <Box mt={5}>
-                    <Typography variant="body2" color="text.secondary" align="center">
-                        {'Copyright © '}
-                        <Link color="inherit" href="https://yourbank.com/">
-                            Online Banking System
-                        </Link>{' '}
-                        {new Date().getFullYear()}
-                        {'.'}
-                    </Typography>
-                </Box>
-            </Container>
-        </Box>
-    );
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import Accounts from "./pages/Accounts";
+import Transfer from "./pages/Transfer";
+import TransactionHistory from "./pages/TransactionHistory";
+import BillPayments from "./pages/BillPayments";
+import BankerDashboard from "./pages/BankerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import RecurringPayments from "./pages/RecurringPayments";
+import About from "./pages/About";
+
+import { logout } from "./store/authSlice";
+import { clearMessage } from "./store/messageSlice";
+
+import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+const App = () => {
+  const [showAdminBoard, setShowAdminBoard] = useState(false);
+  const [showBankerBoard, setShowBankerBoard] = useState(false);
+
+  // ... (rest of logic) ...
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  let location = useLocation();
+
+  useEffect(() => {
+    if (["/login", "/register"].includes(location.pathname)) {
+      dispatch(clearMessage());
+    }
+  }, [dispatch, location]);
+
+  useEffect(() => {
+    if (currentUser && currentUser.roles) {
+      setShowAdminBoard(currentUser.roles.includes("ROLE_ADMIN"));
+      setShowBankerBoard(currentUser.roles.includes("ROLE_BANKER"));
+    } else {
+      setShowAdminBoard(false);
+      setShowBankerBoard(false);
+    }
+  }, [currentUser]);
+
+  const logOut = () => {
+    dispatch(logout());
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            component={Link}
+            to="/"
+          >
+            <AccountBalanceIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
+              OBS
+            </Link>
+          </Typography>
+
+          {currentUser ? (
+            <Box>
+              {showAdminBoard && (
+                <Button color="inherit" component={Link} to="/admin">
+                  Admin
+                </Button>
+              )}
+              {showBankerBoard && (
+                <Button color="inherit" component={Link} to="/banker">
+                  Banker
+                </Button>
+              )}
+              {!showAdminBoard && !showBankerBoard && (
+                <>
+                  <Button color="inherit" component={Link} to="/accounts">
+                    Accounts
+                  </Button>
+                  <Button color="inherit" component={Link} to="/transfer">
+                    Transfer
+                  </Button>
+                  <Button color="inherit" component={Link} to="/bills">
+                    Bills
+                  </Button>
+                  <Button color="inherit" component={Link} to="/recurring">
+                    Recurring
+                  </Button>
+                  <Button color="inherit" component={Link} to="/transactions">
+                    History
+                  </Button>
+                </>
+              )}
+              <Chip
+                avatar={<Avatar sx={{ bgcolor: '#ff5722', color: 'white', fontWeight: 'bold' }}>{currentUser.username?.charAt(0).toUpperCase()}</Avatar>}
+                label={currentUser.username}
+                component={Link}
+                to="/profile"
+                clickable
+                sx={{
+                  ml: 2,
+                  mr: 1,
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' },
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  height: 40,
+                  borderRadius: '20px',
+                  px: 1
+                }}
+              />
+              <IconButton
+                onClick={logOut}
+                color="inherit"
+                title="Logout"
+                sx={{
+                  ml: 1,
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  padding: '8px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 68, 68, 0.2)', // Subtle red tint on hover
+                    borderColor: '#ff4444'
+                  },
+                  transition: 'all 0.2s'
+                }}
+              >
+                <LogoutIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          ) : (
+            <Box>
+              <Button color="inherit" component={Link} to="/login">
+                Login
+              </Button>
+              <Button color="inherit" component={Link} to="/register">
+                Sign Up
+              </Button>
+            </Box>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Container sx={{ mt: 3, mb: 3, flexGrow: 1 }}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/accounts" element={<Accounts />} />
+            <Route path="/transfer" element={<Transfer />} />
+            <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/bills" element={<BillPayments />} />
+            <Route path="/recurring" element={<RecurringPayments />} />
+            <Route path="/banker" element={<BankerDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+        </Routes>
+      </Container>
+
+      <Footer />
+    </Box>
+  );
 };
 
-export default Footer;
+export default App;

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Container } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Container, Chip, Avatar } from "@mui/material";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -103,12 +104,43 @@ const App = () => {
                   </Button>
                 </>
               )}
-              <Button color="inherit" component={Link} to="/profile">
-                {currentUser.username}
-              </Button>
-              <Button color="inherit" onClick={logOut}>
-                LogOut
-              </Button>
+              <Chip
+                avatar={<Avatar sx={{ bgcolor: '#ff5722', color: 'white', fontWeight: 'bold' }}>{currentUser.username?.charAt(0).toUpperCase()}</Avatar>}
+                label={currentUser.username}
+                component={Link}
+                to="/profile"
+                clickable
+                sx={{
+                  ml: 2,
+                  mr: 1,
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' },
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  height: 40,
+                  borderRadius: '20px',
+                  px: 1
+                }}
+              />
+              <IconButton
+                onClick={logOut}
+                color="inherit"
+                title="Logout"
+                sx={{
+                  ml: 1,
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  padding: '8px',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 68, 68, 0.2)', // Subtle red tint on hover
+                    borderColor: '#ff4444'
+                  },
+                  transition: 'all 0.2s'
+                }}
+              >
+                <LogoutIcon fontSize="small" />
+              </IconButton>
             </Box>
           ) : (
             <Box>
