@@ -14,16 +14,27 @@ import {
     Grid,
     CircularProgress,
     Link,
+    InputAdornment,
+    IconButton,
 } from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const Register = () => {
     const form = useRef();
 
     const [username, setUsername] = useState("");
+    const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
     // const [role, setRole] = useState("customer"); // Removed and defaulted to customer
     const [successful, setSuccessful] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,6 +51,8 @@ const Register = () => {
         let tempErrors = {};
         if (username.length < 3) tempErrors.username = "Username must be at least 3 characters.";
         if (username.length > 20) tempErrors.username = "Username too long (max 20).";
+
+        if (!fullName) tempErrors.fullName = "Full Name is required.";
 
         if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) tempErrors.email = "Invalid email address.";
 
@@ -58,7 +71,7 @@ const Register = () => {
 
         if (validate()) {
             setLoading(true);
-            dispatch(register({ username, email, password, phoneNumber, role: ["customer"] }))
+            dispatch(register({ username, fullName, email, password, phoneNumber, role: ["customer"] }))
                 .unwrap()
                 .then(() => {
                     setSuccessful(true);
@@ -152,6 +165,19 @@ const Register = () => {
                                         <TextField
                                             required
                                             fullWidth
+                                            id="fullName"
+                                            label="Full Name"
+                                            name="fullName"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            error={!!errors.fullName}
+                                            helperText={errors.fullName}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            required
+                                            fullWidth
                                             id="username"
                                             label="Username"
                                             name="username"
@@ -194,12 +220,26 @@ const Register = () => {
                                             fullWidth
                                             name="password"
                                             label="Password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             id="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             error={!!errors.password}
                                             helperText={errors.password || "Min 6 characters"}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            aria-label="toggle password visibility"
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
                                         />
                                     </Grid>
                                     {/* Role selection removed - default to customer */}

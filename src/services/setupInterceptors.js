@@ -19,7 +19,8 @@ const setupInterceptors = (store) => {
 
             if (error.response) {
                 // Access Token was expired
-                if (error.response.status === 401 && !originalRequest._retry) {
+                // Exclude login/signin requests from this global 401 handler
+                if (error.response.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/auth/signin")) {
                     store.dispatch(logout());
                     window.location.href = "/login"; // Or use history.push if capable
                 }

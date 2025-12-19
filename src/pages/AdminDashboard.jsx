@@ -17,19 +17,31 @@ import {
     DialogActions,
     TextField,
     Box,
-    Alert
+    Alert,
+    InputAdornment,
+    IconButton,
 } from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [open, setOpen] = useState(false);
     const [newUser, setNewUser] = useState({
         username: "",
+        fullName: "",
         email: "",
         password: "",
         phoneNumber: ""
     });
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
@@ -66,11 +78,11 @@ const AdminDashboard = () => {
     const handleCreateBanker = () => {
         setError("");
         setMessage("");
-        AdminService.createBanker(newUser.username, newUser.email, newUser.password, newUser.phoneNumber).then(
+        AdminService.createBanker(newUser.username, newUser.fullName, newUser.email, newUser.password, newUser.phoneNumber).then(
             (response) => {
                 setMessage("Banker created successfully!");
                 loadUsers();
-                setNewUser({ username: "", email: "", password: "", phoneNumber: "" });
+                setNewUser({ username: "", fullName: "", email: "", password: "", phoneNumber: "" });
                 setTimeout(() => {
                     handleClose();
                 }, 1500);
@@ -100,20 +112,7 @@ const AdminDashboard = () => {
         );
     };
 
-    const handleDeleteUser = (id) => {
-        if (window.confirm("Are you sure you want to delete this user? This will delete all their accounts and transactions.")) {
-            AdminService.deleteUser(id).then(
-                (response) => {
-                    setMessage(response.data.message);
-                    loadUsers();
-                },
-                (error) => {
-                    const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-                    setError(resMessage);
-                }
-            );
-        }
-    };
+
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -172,14 +171,7 @@ const AdminDashboard = () => {
                                     >
                                         {user.active ? "Deactivate" : "Activate"}
                                     </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="error"
-                                        size="small"
-                                        onClick={() => handleDeleteUser(user.id)}
-                                    >
-                                        Delete
-                                    </Button>
+
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -194,6 +186,17 @@ const AdminDashboard = () => {
                     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
                     <TextField
                         autoFocus
+                        margin="dense"
+                        id="fullName"
+                        name="fullName"
+                        label="Full Name"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={newUser.fullName}
+                        onChange={handleChange}
+                    />
+                    <TextField
                         margin="dense"
                         id="username"
                         name="username"
@@ -220,11 +223,25 @@ const AdminDashboard = () => {
                         id="password"
                         name="password"
                         label="Password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         fullWidth
                         variant="outlined"
                         value={newUser.password}
                         onChange={handleChange}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <TextField
                         margin="dense"

@@ -3,6 +3,7 @@ import TransactionService from "../services/transaction.service";
 import AccountService from "../services/account.service";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, TextField, Box, Button } from "@mui/material";
 import DownloadIcon from '@mui/icons-material/Download';
+import AccountNumber from "../components/AccountNumber";
 
 const TransactionHistory = () => {
     const [accounts, setAccounts] = useState([]);
@@ -122,7 +123,7 @@ const TransactionHistory = () => {
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <TableCell component="th" scope="row">
-                                    {transaction.id}
+                                    {transaction.transactionId || transaction.id}
                                 </TableCell>
                                 <TableCell>{new Date(transaction.timestamp).toLocaleString()}</TableCell>
                                 <TableCell>{transaction.type}</TableCell>
@@ -130,7 +131,7 @@ const TransactionHistory = () => {
                                 <TableCell align="right" sx={{ color: transaction.amount > 0 ? 'green' : 'red' }}>
                                     {transaction.amount}
                                 </TableCell>
-                                <TableCell>{transaction.targetAccountNumber}</TableCell>
+                                <TableCell>{transaction.targetAccountNumber ? <AccountNumber accountNumber={transaction.targetAccountNumber} /> : '-'}</TableCell>
                                 <TableCell align="center">
                                     <Button
                                         variant="outlined"

@@ -5,6 +5,7 @@ import {
     TableHead, TableRow, Paper, Button, Box, Alert, TextField,
     Card, CardContent, Grid, Divider, Tab, Tabs
 } from "@mui/material";
+import AccountNumber from "../components/AccountNumber";
 
 const BankerDashboard = () => {
     const [transactions, setTransactions] = useState([]);
@@ -178,9 +179,9 @@ const BankerDashboard = () => {
                                 <TableRow key={transaction.id}>
                                     <TableCell>{transaction.id}</TableCell>
                                     <TableCell>{new Date(transaction.timestamp).toLocaleString()}</TableCell>
-                                    <TableCell>{transaction.account ? transaction.account.accountNumber : 'N/A'}</TableCell>
+                                    <TableCell>{transaction.account ? <AccountNumber accountNumber={transaction.account.accountNumber} /> : 'N/A'}</TableCell>
                                     <TableCell>{Math.abs(transaction.amount)}</TableCell>
-                                    <TableCell>{transaction.targetAccountNumber}</TableCell>
+                                    <TableCell>{transaction.targetAccountNumber ? <AccountNumber accountNumber={transaction.targetAccountNumber} /> : 'N/A'}</TableCell>
                                     <TableCell>
                                         <Button variant="contained" color="success" size="small" onClick={() => handleApprove(transaction.id)} sx={{ mr: 1 }}>
                                             Approve
@@ -220,7 +221,9 @@ const BankerDashboard = () => {
                                 <Typography variant="h6" gutterBottom>Account Details</Typography>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
-                                        <Typography><strong>Account Number:</strong> {accountDetails.accountNumber}</Typography>
+                                        <Typography component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <strong>Account Number:</strong> <AccountNumber accountNumber={accountDetails.accountNumber} />
+                                        </Typography>
                                         <Typography><strong>User ID:</strong> {accountDetails.userId}</Typography>
                                         <Typography><strong>Username:</strong> {accountDetails.username}</Typography>
                                     </Grid>
@@ -293,7 +296,7 @@ const BankerDashboard = () => {
                                         <TableBody>
                                             {accountTransactions.map((t) => (
                                                 <TableRow key={t.id}>
-                                                    <TableCell>{t.id}</TableCell>
+                                                    <TableCell>{t.transactionId || t.id}</TableCell>
                                                     <TableCell>{new Date(t.timestamp).toLocaleString()}</TableCell>
                                                     <TableCell>{t.type}</TableCell>
                                                     <TableCell sx={{ color: t.type === 'CREDIT' ? 'green' : 'red' }}>

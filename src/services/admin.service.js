@@ -7,9 +7,10 @@ const getAllUsers = () => {
     return axios.get(API_URL + "users", { headers: authHeader() });
 };
 
-const createBanker = (username, email, password, phoneNumber) => {
+const createBanker = (username, fullName, email, password, phoneNumber) => {
     return axios.post(API_URL + "create-banker", {
         username,
+        fullName,
         email,
         password,
         phoneNumber

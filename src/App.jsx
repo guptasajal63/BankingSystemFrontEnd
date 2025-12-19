@@ -14,6 +14,7 @@ import BillPayments from "./pages/BillPayments";
 import BankerDashboard from "./pages/BankerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import RecurringPayments from "./pages/RecurringPayments";
+import About from "./pages/About";
 
 import { logout } from "./store/authSlice";
 import { clearMessage } from "./store/messageSlice";
@@ -127,6 +128,7 @@ const App = () => {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />

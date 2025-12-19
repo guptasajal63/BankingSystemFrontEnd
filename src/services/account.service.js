@@ -7,8 +7,8 @@ const getMyAccounts = () => {
     return axios.get(API_URL + "my-accounts", { headers: authHeader() });
 };
 
-const createAccount = (accountType) => {
-    return axios.post(API_URL + "create?accountType=" + accountType, {}, { headers: authHeader() });
+const createAccount = (accountData) => {
+    return axios.post(API_URL + "create", accountData, { headers: authHeader() });
 }
 
 const AccountService = {

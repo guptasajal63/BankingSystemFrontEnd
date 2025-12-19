@@ -13,8 +13,12 @@ import {
     Alert,
     CircularProgress,
     Link,
+    InputAdornment,
+    IconButton,
 } from "@mui/material";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const Login = () => {
     let navigate = useNavigate();
@@ -22,7 +26,13 @@ const Login = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [errors, setErrors] = useState({});
@@ -55,9 +65,15 @@ const Login = () => {
                         window.location.reload();
                     }, 1500);
                 })
-                .catch(() => {
+                .catch((error) => {
                     setLoading(false);
-                    setSnackbarMessage("Invalid username or password");
+                    const resMessage =
+                        (error.response &&
+                            error.response.data &&
+                            error.response.data.message) ||
+                        error.message ||
+                        error.toString();
+                    setSnackbarMessage(resMessage);
                     setOpenSnackbar(true);
                 });
         }
@@ -120,7 +136,7 @@ const Login = () => {
                             fullWidth
                             name="password"
                             label="Password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             id="password"
                             autoComplete="current-password"
                             value={password}
@@ -128,6 +144,20 @@ const Login = () => {
                             error={!!errors.password}
                             helperText={errors.password}
                             sx={{ mb: 3 }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <Button
                             type="submit"
@@ -157,7 +187,7 @@ const Login = () => {
 
             <Snackbar
                 open={openSnackbar || !!message}
-                autoHideDuration={6000}
+                autoHideDuration={7000}
                 onClose={() => setOpenSnackbar(false)}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
